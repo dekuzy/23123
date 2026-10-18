@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Дело №1: Пропавший вечер</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=IBM+Plex+Mono:wght@400;600&family=Marck+Script&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: dark;
+  --board:#1b272c; --board2:#142025; --paper:#e6e9e3; --ink:#1a1f22; --tape:#f2c230; --stamp:#c8323c; --chalk:#9db3b8;
+  --head:'Oswald','Arial Narrow',sans-serif; --mono:'IBM Plex Mono','Courier New',monospace; --hand:'Marck Script','Segoe Script',cursive;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:
+  linear-gradient(rgba(157,179,184,.05) 1px,transparent 1px) 0 0/32px 32px,
+  linear-gradient(90deg,rgba(157,179,184,.05) 1px,transparent 1px) 0 0/32px 32px,
+  radial-gradient(120% 100% at 50% 0,var(--board),var(--board2));
+  color:var(--chalk);font-family:var(--mono);font-size:15px;line-height:1.55}
+main{max-width:520px;margin:0 auto;padding:22px 16px 48px}
+header{text-align:center;margin-bottom:18px}
+.stamp{display:inline-block;font:700 15px var(--head);letter-spacing:.14em;color:var(--stamp);border:2px solid var(--stamp);padding:2px 12px;transform:rotate(-3deg);border-radius:3px}
+h1{font:700 clamp(34px,10vw,50px)/1.05 var(--head);margin:12px 0 0;color:#f3f1ea;letter-spacing:.01em}
+#pins{display:flex;justify-content:space-between;position:relative;margin:22px 8px 20px}
+#pins::before{content:"";position:absolute;left:12px;right:12px;top:50%;height:2px;background:var(--stamp);opacity:.75}
+.pin{position:relative;width:26px;height:26px;border-radius:50%;background:var(--board2);border:2px solid var(--chalk);display:grid;place-items:center;font:600 12px var(--mono);color:var(--chalk);transition:all .4s}
+.pin.on{border-color:var(--tape);color:var(--ink);background:var(--tape)}
+.pin.cur{border-color:#f3f1ea;color:#f3f1ea}
+#card{position:relative;background:var(--paper);color:var(--ink);padding:28px 22px 24px;border-radius:3px;box-shadow:0 18px 40px rgba(0,0,0,.45);transform:rotate(-.5deg)}
+#card::before{content:"";position:absolute;left:50%;top:-12px;width:96px;height:24px;margin-left:-48px;background:rgba(242,194,48,.85);transform:rotate(2deg)}
+#card h2{font:700 26px/1.1 var(--head);margin:0 0 6px;text-transform:none}
+#card p{margin:8px 0}
+.note{font-family:var(--hand);font-size:22px;line-height:1.3;color:#3b4a52}
+.btn{font:600 15px var(--mono);background:var(--ink);color:var(--paper);border:0;padding:12px 20px;border-radius:2px;cursor:pointer;margin-top:12px;touch-action:manipulation}
+.btn.red{background:var(--stamp)}
+.btn:focus-visible,input:focus-visible,.opt:focus-visible,.ev:focus-visible{outline:3px solid var(--tape);outline-offset:2px}
+input[type=text]{width:100%;font:600 18px var(--mono);background:transparent;border:0;border-bottom:2px solid var(--ink);padding:8px 2px;color:var(--ink);margin-top:10px}
+input[type=range]{width:100%;accent-color:var(--stamp);margin:6px 0}
+.cipher{font:600 20px/1.5 var(--mono);letter-spacing:.06em;word-break:break-word;background:rgba(26,31,34,.08);padding:12px;border-radius:2px;min-height:4.2em}
+.opt,.ev{display:block;width:100%;text-align:left;font:400 15px var(--mono);background:transparent;border:2px solid var(--ink);color:var(--ink);padding:11px 12px;margin-top:10px;border-radius:2px;cursor:pointer;touch-action:manipulation}
+.opt:hover,.ev:hover{background:rgba(26,31,34,.07)}
+.ev.done{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.msg{min-height:1.6em;margin-top:10px;font-weight:600;color:var(--stamp)}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#scene{position:relative;height:300px;margin-top:12px;background:#0d1417;overflow:hidden;touch-action:none;border-radius:2px;--x:-999px;--y:-999px;cursor:none}
+#scene i{position:absolute;color:#4d6670;font-style:normal;font-size:16px}
+#scene button.key{position:absolute;background:none;border:0;padding:6px;cursor:pointer}
+#dark{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle 78px at var(--x) var(--y),transparent 0,transparent 35%,rgba(7,10,12,.985) 100%)}
+.big{font:700 40px/1 var(--head)}
+.run{position:relative;transition:transform .18s}
+.closed{display:inline-block;margin-top:14px;font:700 28px var(--head);letter-spacing:.1em;color:var(--stamp);border:3px solid var(--stamp);padding:2px 14px;transform:rotate(-6deg);animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:rotate(-6deg) scale(2.2);opacity:0}}
+@media (prefers-reduced-motion:reduce){.shake,.closed{animation:none}.pin,.run{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="stamp">СЕКРЕТНО</span>
+    <h1>Дело №1:<br>Пропавший вечер</h1>
+  </header>
+  <div id="pins" aria-label="Прогресс расследования"></div>
+  <section id="card" aria-live="polite"></section>
+</main>
+
+<script>
+/* ============ ПРАВЬ ЗДЕСЬ ============ */
+const CONFIG = {
+  name: "Кисуня",
+  briefing: "Из жизни пропал один очень важный вечер. Свидетелей нет, подозреваемый — я. Помоги следствию.",
+  cipherText: "ПАРОЛЬ ОТ СЛЕДУЮЩЕЙ ДВЕРИ: ЗВЕЗДА",
+  cipherShift: 7,
+  cipherAnswer: ["звезда"],
+  question: "Допрос подозреваемого. Что он на самом деле подумал, когда впервые тебя увидел?",
+  options: [
+    ["«Надо срочно сделать вид, что я спокоен»", "Близко, но это было только вторым пунктом."],
+    ["«Хоть бы она заговорила первой»", "Тоже мелькало, но главным было не это."],
+    ["«Какая же она красивая... главное — не переживать»", "Верно. Показания совпали."],
+    ["«Интересно, что на ужин?»", "Следствие в шоке. Нет."]
+  ],
+  correct: 2,
+  events: ["Мы познакомились", "Поехали домой ночью на мопеде", "Гуляли до 3 ночи", "Сегодня: ты расследуешь моё дело"]
+};
+/* ===================================== */
+
+const $ = s => document.querySelector(s);
+const card = $("#card");
+const ALPHA = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+let stage = -1;
+const TOTAL = 4;
+
+function drawPins(){
+  $("#pins").innerHTML = Array.from({length: TOTAL}, (_, i) =>
+    `<span class="pin ${i < stage ? "on" : ""} ${i === stage ? "cur" : ""}">${i < stage ? "✓" : i + 1}</span>`).join("");
+}
+function shake(){ card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake"); }
+function norm(s){ return s.toLowerCase().replace(/ё/g, "е").replace(/[^а-яa-z0-9]/g, ""); }
+function shift(text, n){
+  return [...text.toUpperCase()].map(ch => { const i = ALPHA.indexOf(ch); return i < 0 ? ch : ALPHA[(i + n + 33) % 33]; }).join("");
+}
+function advance(){
+  stage++; drawPins();
+  [cipher, question, timeline, flashlight, finale][stage]();
+  card.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start"});
+}
+
+function intro(){
+  stage = -1; drawPins();
+  card.innerHTML = `<h2>Детектив ${CONFIG.name}</h2>
+    <p>${CONFIG.briefing}</p>
+    <p class="note">Улик четыре. Время не ограничено, но шеф нервничает.</p>
+    <button class="btn red" id="go">Принять дело</button>`;
+  $("#go").onclick = () => { stage = 0; drawPins(); cipher(); };
+}
+
+function cipher(){
+  const enc = shift(CONFIG.cipherText, CONFIG.cipherShift);
+  card.innerHTML = `<h2>Улика 1. Шифровка</h2>
+    <p>Агент перехватил сообщение. Каждая буква сдвинута по алфавиту. Покрути ползунок, пока не появится текст.</p>
+    <div class="cipher" id="out"></div>
+    <label for="sl">Сдвиг: <b id="sv">0</b></label>
+    <input type="range" id="sl" min="0" max="32" value="0">
+    <p>Введи найденный пароль:</p>
+    <input type="text" id="ans" autocomplete="off" autocapitalize="off">
+    <div class="msg" id="msg"></div>
+    <button class="btn" id="ok">Проверить</button>`;
+  const upd = () => { const n = +$("#sl").value; $("#sv").textContent = n; $("#out").textContent = shift(enc, -n); };
+  $("#sl").oninput = upd; upd();
+  const check = () => {
+    if (CONFIG.cipherAnswer.map(norm).includes(norm($("#ans").value))) advance();
+    else { $("#msg").textContent = "Пароль не подходит. Дверь не открылась."; shake(); }
+  };
+  $("#ok").onclick = check;
+  $("#ans").onkeydown = e => { if (e.key === "Enter") check(); };
+}
+
+function question(){
+  card.innerHTML = `<h2>Улика 2. Допрос</h2><p>${CONFIG.question}</p><div id="opts"></div><div class="msg" id="msg"></div>`;
+  CONFIG.options.forEach(([text, fb], i) => {
+    const b = document.createElement("button");
+    b.className = "opt"; b.textContent = text;
+    b.onclick = () => {
+      $("#msg").textContent = fb;
+      if (i === CONFIG.correct){ document.querySelectorAll(".opt").forEach(o => o.disabled = true); setTimeout(advance, 1600); }
+      else shake();
+    };
+    $("#opts").appendChild(b);
+  });
+}
+
+function timeline(){
+  const order = CONFIG.events.map((t, i) => ({t, i}));
+  for (let i = order.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  let next = 0;
+  card.innerHTML = `<h2>Улика 3. Хронология</h2><p>Показания перепутались. Нажимай на события в том порядке, в каком они случились.</p><div id="evs"></div><div class="msg" id="msg"></div>`;
+  order.forEach(o => {
+    const b = document.createElement("button");
+    b.className = "ev"; b.textContent = o.t;
+    b.onclick = () => {
+      if (o.i === next){
+        b.classList.add("done"); b.disabled = true; b.textContent = (next + 1) + ". " + o.t; next++;
+        $("#msg").textContent = "";
+        if (next === order.length) setTimeout(advance, 900);
+      } else {
+        $("#msg").textContent = "Не сходится по времени. Начнём сначала.";
+        next = 0; shake();
+        document.querySelectorAll(".ev").forEach((e, k) => { e.classList.remove("done"); e.disabled = false; e.textContent = order[k].t; });
+      }
+    };
+    $("#evs").appendChild(b);
+  });
+}
+
+function flashlight(){
+  card.innerHTML = `<h2>Улика 4. Тёмная комната</h2><p>Свет отключили. Веди пальцем или мышкой, чтобы подсвечивать комнату. Ищи то, что блестит.</p>
+    <div id="scene"><div id="dark"></div></div><div class="msg" id="msg"></div>`;
+  const sc = $("#scene"), glyphs = ["·", "○", "✕", "∿", "▫", "·", "·"];
+  for (let i = 0; i < 28; i++){
+    const g = document.createElement("i");
+    g.textContent = glyphs[i % glyphs.length];
+    g.style.left = Math.random() * 94 + "%"; g.style.top = Math.random() * 92 + "%";
+    sc.insertBefore(g, $("#dark"));
+  }
+  const key = document.createElement("button");
+  key.className = "key"; key.setAttribute("aria-label", "Ключ");
+  key.style.left = (8 + Math.random() * 78) + "%"; key.style.top = (8 + Math.random() * 74) + "%";
+  key.innerHTML = `<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#f2c230" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="7.5" r="4.5"/><path d="M11 11l10 10M17 17l3-3M14 14l3-3"/></svg>`;
+  key.onclick = () => { key.style.filter = "drop-shadow(0 0 10px #f2c230)"; $("#msg").textContent = "Нашла! Ключ подошёл."; sc.style.cursor = "auto"; setTimeout(advance, 1300); };
+  sc.insertBefore(key, $("#dark"));
+  const move = e => { const r = sc.getBoundingClientRect(); sc.style.setProperty("--x", (e.clientX - r.left) + "px"); sc.style.setProperty("--y", (e.clientY - r.top) + "px"); };
+  sc.addEventListener("pointermove", move); sc.addEventListener("pointerdown", move);
+}
+
+function finale(){
+  card.innerHTML = `<h2>Дело раскрыто</h2>
+    <p>Подозреваемый во всём признаётся. Его показания:</p>
+    <p class="note">Я очень тебя люблю, ${CONFIG.name}. Ты красивая, добрая и настоящая, и мне с тобой по-настоящему хорошо.</p>
+    <p class="note">Я верю в тебя. Во всё, что ты задумала, и во всё, что у тебя получится. Ты справишься, а я буду рядом.</p>
+    <p class="note">Спасибо, что ты есть.</p>
+    <span class="closed">ДЕЛО ЗАКРЫТО</span><br>
+    <button class="btn" id="again">Пройти ещё раз</button>`;
+  $("#again").onclick = intro;
+}
+
+drawPins();
+intro();
+</script>
+</body>
+</html>
